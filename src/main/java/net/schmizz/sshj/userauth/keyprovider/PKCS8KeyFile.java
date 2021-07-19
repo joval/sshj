@@ -18,7 +18,11 @@ package net.schmizz.sshj.userauth.keyprovider;
 import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.common.SecurityUtils;
 import net.schmizz.sshj.userauth.password.PasswordUtils;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.openssl.EncryptionException;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMException;
@@ -153,17 +157,26 @@ public class PKCS8KeyFile extends BaseFileKeyProvider {
     }
 
     private KeyPair getKeyPair(JcaPEMKeyConverter pemConverter, PrivateKeyInfo pki) throws PEMException, NoSuchAlgorithmException, InvalidKeySpecException {
-        // get the private key
-        RSAPrivateKey privateKey = (RSAPrivateKey)pemConverter.getPrivateKey(pki);
-        BigInteger publicExponent = BigInteger.valueOf(65537);
-        if (privateKey instanceof RSAPrivateCrtKey) {
-            publicExponent = ((RSAPrivateCrtKey)privateKey).getPublicExponent();
-        }
+	PublicKey publicKey;
+	PrivateKey privateKey;
 
-        // get the public key
-        RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(privateKey.getModulus(), publicExponent);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
+	ASN1ObjectIdentifier oid = pki.getPrivateKeyAlgorithm().getAlgorithm();
+        if (oid.equals(PKCSObjectIdentifiers.rsaEncryption)) {
+            privateKey = (PrivateKey)pemConverter.getPrivateKey(pki);
+            BigInteger publicExponent = BigInteger.valueOf(65537);
+            if (privateKey instanceof RSAPrivateCrtKey) {
+                publicExponent = ((RSAPrivateCrtKey)privateKey).getPublicExponent();
+            }
+            RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(((RSAPrivateKey)privateKey).getModulus(), publicExponent);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            publicKey = keyFactory.generatePublic(publicKeySpec);
+        } else if (oid.equals(X9ObjectIdentifiers.id_dsa)) {
+	    throw new PEMException("PKCS8KeyFile does not implement DSA support");
+        } else if (oid.equals(X9ObjectIdentifiers.id_ecPublicKey)) {
+	    throw new PEMException("PKCS8KeyFile does not implement ECDSA support");
+        } else {
+	    throw new PEMException(String.format("PKCS8KeyFile does not implement support for %s", oid.toString()));
+        }
 
         return new KeyPair(publicKey, privateKey);
     }
