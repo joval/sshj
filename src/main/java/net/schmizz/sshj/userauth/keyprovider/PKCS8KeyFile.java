@@ -45,8 +45,12 @@ import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.RSAPublicKeySpec;
@@ -171,7 +175,17 @@ public class PKCS8KeyFile extends BaseFileKeyProvider {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             publicKey = keyFactory.generatePublic(publicKeySpec);
         } else if (oid.equals(X9ObjectIdentifiers.id_dsa)) {
-	    throw new PEMException("PKCS8KeyFile does not implement DSA support");
+	    privateKey = (PrivateKey)pemConverter.getPrivateKey(pki);	
+	    DSAParams dsaParams = ((DSAPrivateKey)privateKey).getParams();
+	    BigInteger p = dsaParams.getP();
+	    BigInteger q = dsaParams.getQ();
+	    BigInteger g = dsaParams.getG();
+	    BigInteger x = ((DSAPrivateKey)privateKey).getX();
+	    BigInteger y = g.modPow(x,p); //y = g ^ x mod p
+	    
+	    KeyFactory keyFactory = KeyFactory.getInstance("DSA");
+	    DSAPublicKeySpec publicKeySpec = new DSAPublicKeySpec(y, p, q, g);
+	    publicKey = keyFactory.generatePublic(publicKeySpec);	
         } else if (oid.equals(X9ObjectIdentifiers.id_ecPublicKey)) {
 	    throw new PEMException("PKCS8KeyFile does not implement ECDSA support");
         } else {
