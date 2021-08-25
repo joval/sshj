@@ -426,7 +426,7 @@ public enum KeyType {
 
     public static KeyType fromString(String sType) {
         for (KeyType kt : values())
-            if (kt.sType.equals(sType))
+            if (kt.available() && kt.sType.equals(sType))
                 return kt;
         return UNKNOWN;
     }
