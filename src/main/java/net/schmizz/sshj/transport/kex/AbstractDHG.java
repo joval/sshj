@@ -111,7 +111,7 @@ public abstract class AbstractDHG extends AbstractDH {
                 caKeyType = null;
             }
             log.debug("Verifying signature of the key with type {} (signature type {}, CA key type {})",
-                      hostKey.getType(), signatureType, caKeyType);
+                      new Object[] { hostKey.getType(), signatureType, caKeyType });
 
             try {
                 final String certError = KeyType.CertUtils.verifyHostCertificate(K_S, hostKey, trans.getRemoteHost());
