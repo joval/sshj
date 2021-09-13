@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Objects;
 
 /**
  * Key Pair Converter from RSA Private Key Information to PEM Key Pair
@@ -44,7 +43,6 @@ class RSAPrivateKeyInfoKeyPairConverter implements KeyPairConverter<PrivateKeyIn
      */
     @Override
     public PEMKeyPair getKeyPair(final PrivateKeyInfo privateKeyInfo) throws IOException {
-        Objects.requireNonNull(privateKeyInfo, "Private Key Info required");
         final AlgorithmIdentifier algorithmIdentifier = privateKeyInfo.getPrivateKeyAlgorithm();
         final ASN1ObjectIdentifier algorithm = algorithmIdentifier.getAlgorithm();
         if (PKCSObjectIdentifiers.rsaEncryption.equals(algorithm)) {

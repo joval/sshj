@@ -119,7 +119,10 @@ public abstract class AbstractDHG extends AbstractDH {
                     throw new TransportException(DisconnectReason.KEY_EXCHANGE_FAILED,
                                                  "KeyExchange certificate check failed: " + certError);
                 }
-            } catch (Buffer.BufferException | SSHRuntimeException e) {
+            } catch (Buffer.BufferException e) {
+                throw new TransportException(DisconnectReason.KEY_EXCHANGE_FAILED,
+                                             "KeyExchange certificate check failed", e);
+            } catch (SSHRuntimeException e) {
                 throw new TransportException(DisconnectReason.KEY_EXCHANGE_FAILED,
                                              "KeyExchange certificate check failed", e);
             }

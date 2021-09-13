@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Objects;
 
 /**
  * Key Pair Converter from ECDSA Private Key Information to PEM Key Pair
@@ -51,7 +50,6 @@ class ECDSAPrivateKeyInfoKeyPairConverter implements KeyPairConverter<PrivateKey
      */
     @Override
     public PEMKeyPair getKeyPair(final PrivateKeyInfo privateKeyInfo) throws IOException {
-        Objects.requireNonNull(privateKeyInfo, "Private Key Info required");
         final AlgorithmIdentifier algorithmIdentifier = privateKeyInfo.getPrivateKeyAlgorithm();
         final ASN1ObjectIdentifier algorithm = algorithmIdentifier.getAlgorithm();
         if (X9ObjectIdentifiers.id_ecPublicKey.equals(algorithm)) {

@@ -23,7 +23,6 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.openssl.PEMKeyPair;
 
 import java.io.IOException;
-import java.util.Objects;
 
 /**
  * Key Pair Converter for Private Key Information using known Algorithm Object Identifiers
@@ -44,7 +43,6 @@ public class PrivateKeyInfoKeyPairConverter implements KeyPairConverter<PrivateK
      */
     @Override
     public PEMKeyPair getKeyPair(final PrivateKeyInfo privateKeyInfo) throws IOException {
-        Objects.requireNonNull(privateKeyInfo, "Private Key Info required");
         final AlgorithmIdentifier algorithmIdentifier = privateKeyInfo.getPrivateKeyAlgorithm();
         final ASN1ObjectIdentifier algorithm = algorithmIdentifier.getAlgorithm();
 
